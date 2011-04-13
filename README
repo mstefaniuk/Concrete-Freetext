@@ -1,0 +1,2 @@
+== Concrete freetext editor ==
+Simple user interface to edit [[http://concrete-editor.org/ Concrete Editor]] compliant metamodel. It would provide code completion for syntax and object references.
