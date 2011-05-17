@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>FreeText editor for Concrete</title>
+        <script type="text/javascript" src="javascript/jquery.js"></script>
+        <script type="text/javascript" src="javascript/jsdump.js"></script>
+        <script type="text/javascript" src="javascript/contextParser.js"></script>
+        <script type="text/javascript" src="javascript/tx_utils.js"></script>
+        <script type="text/javascript" src="javascript/EventDispatcher.js"></script>
+        <script type="text/javascript" src="javascript/TextViewer.js"></script>
+        <script type="text/javascript" src="javascript/ContentAssist.js"></script>
+        <script type="text/javascript" src="javascript/CompletionProposal.js"></script>
+        <script type="text/javascript" src="javascript/ContentAssistProcessor.js"></script>
+        <script type="text/javascript" src="javascript/ConcreteContentAssist.js"></script>
+        <link rel="stylesheet" type="text/css" href="stylesheet/content-assist.css" media="all" />
+        <link rel="stylesheet" type="text/css" href="stylesheet/layout.css" media="all" />
+    </head>
+    <body>
+        <div id="container">
+            <div id="result-tree-wrapper">
+                <h3>Concrete metamodel result tree</h3>
+                <pre id="result-tree">No result tree.</pre>
+            </div>
+            <div id="input-wrapper">
+                <h3>Free text input</h3>
+                <textarea rows="25" cols="50" id="editor"></textarea>
+                <div id="message" />
+            </div>
+            
+        </div>
+        <script type="text/javascript">
+            /* <![CDATA[ */
+            function parseResult() {
+                parsing = true;
+                var previous = contextParserConfig;
+                contextParserConfig = {laxParsing: false, failOnCursor: true};
+                try {
+                    var resultTree = contextParser.parse($("#editor").val());
+                    $("#result-tree").text(jsDump.parse(resultTree));
+                    $("#message").text("Text parsed succesfully.");
+                } catch (e) {
+                    $("#message").text(buildErrorMessage(e));
+                }
+                contextParserConfig = previous;
+                setTimeout(function() {if (!parsing) parseResult();}, 1000);
+                parsing = false;
+            }
+            
+            function buildErrorMessage(e) {
+                return e.line !== undefined && e.column !== undefined
+          	        ? "Line " + e.line + ", column " + e.column + ": " + e.message
+          	        : e.message;
+              }
+            
+            var parsing = false;
+            var contextParserConfig;
+            new ConcreteContentAssist(document.getElementById('editor'));
+            parseResult();
+            
+        /* ]]> */</script>
+    </body>
+</html>
