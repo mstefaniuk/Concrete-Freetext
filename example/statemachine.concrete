@@ -1,0 +1,30 @@
+Statemachine
+ has obligatory name as string,
+ contains any number of variables as Variable,
+ contains any number of triggers as Trigger,
+ contains any number of states as State.
+Variable
+ has obligatory name as string.
+Trigger
+ has obligatory name as string.
+State is abstract
+ has obligatory name as string,
+ contains any number of transitions as Transition.
+SimpleState extends State.
+CompositeState extends State
+ contains any number of subStates as State.
+Transition
+ has obligatory target referring to State,
+ has any number of trigger referring to Trigger,
+ contains optional condition as Expression.
+Expression.
+AndExpression extends Expression
+ contains at least 1 of expr1 as Expression,
+ contains at least 1 of expr2 as Expression.
+OrExpression extends Expression
+ contains at least 1 of expr1 as Expression,
+ contains at least 1 of expr2 as Expression.
+NotExpression extends Expression
+ contains at least 1 of expr as Expression.
+VarRef extends Expression
+ has obligatory variable referring to Variable.
