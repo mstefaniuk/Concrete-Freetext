@@ -23,14 +23,11 @@
                 It uses structured approach where appearance can be highly customized with HTML/CSS templates.
                 Creation of a language is based on defining specific metamodel and optionally javascript plugins.
             </p>
-            <p>It is structured editor so new entities are created with set of attribute placeholders.
-                It is convenient in most situations but in some cases not. Expression languages (arithemtic or XPath)
-                are easier to edit in free text manner. Certain level of precision and convenience in that case
-                can be provided by content completion.</p>
-            <p>I implemented simple free-text editor for Concrete metamodel. Main idea was to create language
-                looks similar to natural language. It is not polished too much but it shows the concept.
-                Source code is available on
+            <p>This project is simple free-text editor with code completion for Concrete metamodel.
+                Main idea was to create language looks similar to natural language. It is not polished too much
+                but it shows the concept. Source code is available on
                 <a href="http://github.com/mstefaniuk/Concrete-Freetext">Concrete-Freetext project page</a>.
+                Some details about implementation you can find on 
                 Below you have an example with definition of Statemachine metamodel.</p>
             <div id="result-tree-wrapper">
                 <h3>Concrete metamodel result tree</h3>
@@ -39,35 +36,35 @@
             <div id="input-wrapper">
                 <h3>Free text input</h3>
                 <textarea rows="25" cols="50" id="editor">Statemachine
-                    has obligatory name as string,
-                    contains any number of variables as Variable,
-                    contains any number of triggers as Trigger,
-                    contains any number of states as State.
-                    Variable
-                    has obligatory name as string.
-                    Trigger
-                    has obligatory name as string.
-                    State is abstract
-                    has obligatory name as string,
-                    contains any number of transitions as Transition.
-                    SimpleState extends State.
-                    CompositeState extends State
-                    contains any number of subStates as State.
-                    Transition
-                    has obligatory target referring to State,
-                    has any number of trigger referring to Trigger,
-                    contains optional condition as Expression.
-                    Expression.
-                    AndExpression extends Expression
-                    contains at least 1 of expr1 as Expression,
-                    contains at least 1 of expr2 as Expression.
-                    OrExpression extends Expression
-                    contains at least 1 of expr1 as Expression,
-                    contains at least 1 of expr2 as Expression.
-                    NotExpression extends Expression
-                    contains at least 1 of expr as Expression.
-                    VarRef extends Expression
-                    has obligatory variable referring to Variable.</textarea>
+ has obligatory name as string,
+ contains any number of variables as Variable,
+ contains any number of triggers as Trigger,
+ contains any number of states as State.
+Variable
+ has obligatory name as string.
+Trigger
+ has obligatory name as string.
+State is abstract
+ has obligatory name as string,
+ contains any number of transitions as Transition.
+SimpleState extends State.
+CompositeState extends State
+ contains any number of subStates as State.
+Transition
+ has obligatory target referring to State,
+ has any number of trigger referring to Trigger,
+ contains optional condition as Expression.
+Expression.
+AndExpression extends Expression
+ contains at least 1 of expr1 as Expression,
+ contains at least 1 of expr2 as Expression.
+OrExpression extends Expression
+ contains at least 1 of expr1 as Expression,
+ contains at least 1 of expr2 as Expression.
+NotExpression extends Expression
+ contains at least 1 of expr as Expression.
+VarRef extends Expression
+ has obligatory variable referring to Variable.</textarea>
                 <div id="message" />
             </div>
             
