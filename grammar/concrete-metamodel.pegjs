@@ -23,7 +23,7 @@ Sentence =  EnumerationSentence / ClassSentence / LaxSentence
 LaxSentence = &{return laxParsing}
 	c:ClassName (__ WordOrCursor)* "."?
 	{return {"_class" : "Class", "name" : c}}
-WordOrCursor =  Cursor /AnyWord
+WordOrCursor =  Cursor / AnyWord
 Cursor = !{return failOnCursor}
 	f:QName? "#"
 	{cursor = {"_cursor": f}}
