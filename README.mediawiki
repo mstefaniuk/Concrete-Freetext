@@ -1,2 +1,6 @@
 == Concrete freetext editor ==
-Simple user interface to edit [http://concrete-editor.org/ Concrete Editor] compliant metamodel. It would provide code completion for syntax and object references.
+Simple user interface to edit [http://concrete-editor.org/ Concrete Editor] compliant metamodel in free text manner.
+It provides code completion for language syntax and object references.
+It uses single grammar and parser to provide input parsing and to support code completion.
+
+Please take a look on [http://mstefaniuk.github.com/Concrete-Freetext/editor/index.html demo page].
