@@ -4,3 +4,4 @@ It provides code completion for language syntax and object references.
 It uses single grammar and parser to provide input parsing and to support code completion.
 
 Please take a look on [http://mstefaniuk.github.com/Concrete-Freetext/editor/index.html demo page].
+Some implementation description you can read on my [http://eutechne.stefaniuk.info/2011/10/dsl-editor-with-code-completion-in.html DSL editor with code completion in Javascript] post. 
