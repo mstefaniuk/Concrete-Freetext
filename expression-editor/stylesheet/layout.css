@@ -1,0 +1,57 @@
+body {font-size: 12px}
+
+textarea, pre {
+    font-family: courier, fixed, monospace;
+    font-size: 0.9em;
+}
+#result-wrapper, #input-wrapper {
+    border: gray 3px solid;
+    padding: 2px;
+}
+pre {margin: 0}
+h3 {
+    background-color: #eee;
+    margin: 0;
+    padding: 5px;
+}
+#container {
+    width: 85%;
+    min-width: 1020px;
+    margin: auto;
+}
+
+#result-wrapper {
+    float: right;
+    width: 47%;
+    margin: 5px;
+    height: 80%;
+    overflow: auto;
+}
+#result {
+    padding: 3px;
+    max-height: 28em;
+    overflow: auto;
+}
+#input-wrapper {
+    width: 47%;
+    float: left;
+    padding: 3px;
+    margin: 5px;
+}
+#editor {
+    width: 100%;
+    height: 26em;
+    max-height: 28em;
+    border: 1px;
+}
+#message {
+    width: 98%;
+    padding: 5px;
+    float: left;
+}
+.success {
+    background-color: #afa;
+}
+.error {
+    background-color: #faa;
+}
