@@ -1,0 +1,271 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Highlight rules generator from PEG grammar</title>
+        <script type="text/javascript" src="javascript/jquery.js"></script>
+        <script type="text/javascript" src="javascript/utils.js"></script>
+        <script type="text/javascript" src="javascript/peg-parser.js"></script>
+        <script type="text/javascript" src="javascript/jsdump.js"></script>
+        <link rel="stylesheet" type="text/css" href="stylesheet/layout.css" media="all" />
+    </head>
+    <body>
+        <div id="container">
+            <h2>Simple syntax highlighting rules generator (for Ace)</h2>
+            <p></p>
+            <div id="result-tree-wrapper">
+                <h3>Highlight rules</h3>
+                <pre id="result-tree">No result.</pre>
+            </div>
+            <div id="input-wrapper">
+                <h3>Grammar</h3>
+                <textarea rows="25" cols="50" id="editor">
+{
+	var laxParsing = (typeof contextParserConfig === 'undefined' ? true: contextParserConfig.laxParsing);
+	var failOnCursor = (typeof contextParserConfig === 'undefined' ? false: contextParserConfig.failOnCursor);
+	
+	var primitives = [];
+	var cursor;
+}
+
+start
+  = Definition
+
+Definition = s:Sentences
+	{var p=[];
+	for (var i=0; i&lt;primitives.length; i++)
+		p.push({"_class": "Datatype", "name": primitives[i]});
+	s = s.concat(p)
+	if (cursor !== undefined) s.push(cursor);
+	return s}
+
+Sentences = (_ s:Sentence _ {return s})+
+Sentence =  EnumerationSentence / ClassSentence / LaxSentence
+
+LaxSentence = &amp;{return laxParsing}
+	c:ClassName (__ WordOrCursor)* "."?
+	{return {"_class" : "Class", "name" : c}}
+WordOrCursor =  Cursor / AnyWord
+Cursor = !{return failOnCursor}
+	f:QName? "#"
+	{cursor = {"_cursor": f}}
+AnyWord = (!("." / __ / "#") .)+
+
+EnumerationSentence = c:ClassName __ ENUMERATION e:EnumerationValues? "."
+	{s = {"_class": "Enum", "name": c};
+		if (e) s["literals"] = e;
+		return s;} 
+EnumerationValues = __ WITH __ VALUES __ f:QName l:(_ "," _ q:QName {return q})*
+	{return [f].concat(l);}
+
+ClassSentence = c:ClassName a:Abstract? e:Extends? f:Features? "."
+	{var s={"_class" : "Class", "name" : c};
+	if (f) s["features"] = f;
+	if (e) s["superTypes"] = e;
+	if (a) s["abstract"] = true;
+	return s}
+Abstract = __ ABSTRACT
+
+Extends = __ EXTENDS __ e:EntityName
+	{return e}
+Features = __ f1:Feature f2:(_ "," _ f3:Feature {return f3})*
+	{if (f2.length != 0) {
+		var r=[f1];
+		for (var i=0; i&lt;f2.length; i++)
+			{r.push(f2[i])};
+	} else {
+		var r=f1;
+	}
+	return r}
+Feature = Attribute / Containment / Reference
+
+Attribute = HAS feature:Multiplicity n:FeatureName __ AS __ p:Primitive
+	{if ($.inArray(p, primitives)) {primitives.push(p);};
+	feature["kind"] = "attribute";
+	feature["name"] = n;
+	feature["type"] = p;
+	return feature}
+Containment = CONTAINS feature:Multiplicity n:FeatureName __ AS __ e:EntityName
+	{feature["kind"] = "containment";
+	feature["name"] = n;
+	feature["type"] = e;
+	return feature}
+Reference = HAS feature:Multiplicity n:FeatureName __ REFERRING __ e:EntityName
+	{feature["kind"] = "reference";
+	feature["name"] = n;
+	feature["type"] = e;
+	return feature}
+
+Multiplicity = (AnyNumber / Between / Exact / UnlimitedFrom / Optional / Obligatory)
+AnyNumber = __ "any number of" __
+	{return {"_class" : "Feature", "lowerLimit" : 0, "upperLimit" : -1}}
+Between = __ "from" __ f:Number __ "to" __ t:Number __ "of" __
+	{return {"_class" : "Feature", "lowerLimit" : f, "upperLimit" : t}}
+Exact = __ "exactly" __ n:Number __ "of" __
+	{return {"_class" : "Feature", "lowerLimit" : n, "upperLimit" : n}}
+UnlimitedFrom = __ "at least" __ f:Number __ "of" __
+	{return {"_class" : "Feature", "lowerLimit" : f, "upperLimit" : -1}}
+Optional = __ "optional" __
+	{return {"_class" : "Feature", "lowerLimit" : 0, "upperLimit" : 1}}
+Obligatory = __ "obligatory" __
+	{return {"_class" : "Feature", "lowerLimit" : 1, "upperLimit" : 1}}
+
+ENUMERATION = "is enumeration"
+WITH = "with"
+VALUES = "values"
+ABSTRACT = "is abstract"
+EXTENDS = "extends"
+HAS = "has"
+AS = "as"
+CONTAINS = "contains"
+REFERRING = "referring to"
+
+Number = n:([0-9]+) {return parseInt(n.join(""), 10);}
+
+Primitive = p:("string" / "integer" / "float" / "boolean")
+	{return p.substr(0,1).toUpperCase()+p.substr(1)}
+FeatureName = QName
+ClassName = QName
+
+EntityName "EntityName" = Name / LongName
+QName "QName" = Name
+LongName = "'" Name (" "+ Name)+ "'" / '"' f:Name s:(" "+ t:Name {return " "+t})+ '"' {return f+s.join('')}
+Name "Name" = c:[A-Za-z] d:[A-Za-z0-9]* {return c+d.join('')}
+_ "WS" = [ \n\r]*
+__ "WS" = [ \n\r]+
+
+HighlightingRules = Keyword / Identifier / Occurrence
+Keyword "keyword" = ENUMERATION / WITH / VALUES / ABSTRACT / EXTENDS / HAS / AS / CONTAINS / REFERRING
+Identifier "identifier" = EntityName / FeatureName
+Occurrence "occurrence" = Multiplicity</textarea>
+                <div id="message" />
+            </div>
+            
+        </div>
+        <script type="text/javascript">
+            /* <![CDATA[ */
+            function buildErrorMessage(e) {
+                return e.line !== undefined && e.column !== undefined
+          	        ? "Line " + e.line + ", column " + e.column + ": " + e.message
+          	        : e.message;
+            }
+            
+          function getHiglightingRules(ast) {
+            var result = [];
+            var occurences = {optional: "?", zero_or_more: "*", one_or_more: "+"};
+          
+            function nop() {}
+        
+            function goIntoExpression(node, name) {
+                visit(node.expression, name);
+            }
+        
+            function storeOccurence(node, name) {
+              goIntoExpression(node, name);
+              if (name && (node.expression.type=='class' || node.expression.type=='literal'))
+                  result[name].push(occurences[node.type]);
+            }
+
+            function storeClass(node, name) {
+              if (name) result[name].push(node.rawText);
+            }
+
+            function storeLiteral(node, name) {
+              if (name) result[name].push(node.value);
+            }
+
+            function storeChoice(node, name) {
+              if (name) result[name].push('(');
+              each(node.alternatives, function(alternative) {
+                visit(alternative, name);
+                if (name) result[name].push('|');
+              });
+              if (name) result[name].pop();
+              if (name) result[name].push(')');
+            }
+
+            function startGroup(node, name) {
+                if (!name && node.name!='HighlightingRules') {
+                    result[node.displayName ? node.displayName : node.type] = [];
+                  goIntoExpression(node, node.displayName ? node.displayName : node.type);
+                } else {
+                  goIntoExpression(node, name);
+              }
+            }
+
+            var visit = buildNodeVisitor({
+              grammar:
+                function(node, name) {
+                    visit(node.rules['HighlightingRules'], name);
+                },
+        
+              choice: storeChoice,
+              sequence:
+                function(node, name) {
+                  each(node.elements, function(element) {
+                    visit(element, name);
+                  });
+                },
+              rule:         startGroup,
+              labeled:      goIntoExpression,
+              simple_and:   goIntoExpression,
+              simple_not:   goIntoExpression,
+              semantic_and: nop,
+              semantic_not: nop,
+              optional:     storeOccurence,
+              zero_or_more: storeOccurence,
+              one_or_more:  storeOccurence,
+              action:       goIntoExpression,
+              rule_ref:
+                function(node, name) {
+                  visit(ast.rules[node.name], name);
+                },
+              literal:      storeLiteral,
+              any:          nop,
+              "class":      storeClass
+            });
+        
+            visit(ast, null);
+            return {
+                start: [
+                    {
+                        token:    'identifier',
+                        regex:    result['identifier'].join('')
+                    },
+                    {
+                        token:    'identifier',
+                        regex:    result['keyword'].join('')
+                    },
+                    {
+                        token:    'occurrence',
+                        regex:    result['occurrence'].join('')
+                    }
+                ]
+             };
+          }
+          
+              function buildErrorMessage(e) {
+                  return e.line !== undefined && e.column !== undefined
+            	        ? "Line " + e.line + ", column " + e.column + ": " + e.message
+            	        : e.message;
+              }
+              
+            function parseResult() {
+                try {
+                    var grammarTree = PEGP.parse($("#editor").val())
+                    $("#message").text("Text parsed succesfully.");
+                    $("#message").removeClass("error").addClass("success");
+                    var hlr = getHiglightingRules(grammarTree);
+                    $("#result-tree").text(jsDump.parse(hlr));
+                } catch (e) {
+                    $("#message").text(buildErrorMessage(e));
+                    $("#message").removeClass("success").addClass("error");
+                }
+                // setTimeout(function() {parseResult();}, 1000);
+            }
+            
+            parseResult();
+            
+        /* ]]> */</script>
+    </body>
+</html>

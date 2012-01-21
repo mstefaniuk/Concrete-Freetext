@@ -29,11 +29,11 @@ Cursor = !{return failOnCursor}
 	{cursor = {"_cursor": f}}
 AnyWord = (!("." / __ / "#") .)+
 
-EnumerationSentence = c:ClassName __ "is enumeration" e:EnumerationValues? "."
+EnumerationSentence = c:ClassName __ ENUMERATION e:EnumerationValues? "."
 	{s = {"_class": "Enum", "name": c};
 		if (e) s["literals"] = e;
 		return s;} 
-EnumerationValues = __ "with" __ "values" __ f:QName l:(_ "," _ q:QName {return q})*
+EnumerationValues = __ WITH __ VALUES __ f:QName l:(_ "," _ q:QName {return q})*
 	{return [f].concat(l);}
 
 ClassSentence = c:ClassName a:Abstract? e:Extends? f:Features? "."
@@ -42,8 +42,9 @@ ClassSentence = c:ClassName a:Abstract? e:Extends? f:Features? "."
 	if (e) s["superTypes"] = e;
 	if (a) s["abstract"] = true;
 	return s}
-Abstract = __ "is abstract"
-Extends = __ "extends" __ e:EntityName
+Abstract = __ ABSTRACT
+
+Extends = __ EXTENDS __ e:EntityName
 	{return e}
 Features = __ f1:Feature f2:(_ "," _ f3:Feature {return f3})*
 	{if (f2.length != 0) {
@@ -56,18 +57,18 @@ Features = __ f1:Feature f2:(_ "," _ f3:Feature {return f3})*
 	return r}
 Feature = Attribute / Containment / Reference
 
-Attribute = "has" feature:Multiplicity n:FeatureName __ "as" __ p:Primitive
+Attribute = HAS feature:Multiplicity n:FeatureName __ AS __ p:Primitive
 	{if ($.inArray(p, primitives)) {primitives.push(p);};
 	feature["kind"] = "attribute";
 	feature["name"] = n;
 	feature["type"] = p;
 	return feature}
-Containment = "contains" feature:Multiplicity n:FeatureName __ "as" __ e:EntityName
+Containment = CONTAINS feature:Multiplicity n:FeatureName __ AS __ e:EntityName
 	{feature["kind"] = "containment";
 	feature["name"] = n;
 	feature["type"] = e;
 	return feature}
-Reference = "has" feature:Multiplicity n:FeatureName __ "referring to" __ e:EntityName
+Reference = HAS feature:Multiplicity n:FeatureName __ REFERRING __ e:EntityName
 	{feature["kind"] = "reference";
 	feature["name"] = n;
 	feature["type"] = e;
@@ -87,6 +88,16 @@ Optional = __ "optional" __
 Obligatory = __ "obligatory" __
 	{return {"_class" : "Feature", "lowerLimit" : 1, "upperLimit" : 1}}
 
+ENUMERATION = "is enumeration"
+WITH = "with"
+VALUES = "values"
+ABSTRACT = "is abstract"
+EXTENDS = "extends"
+HAS = "has"
+AS = "as"
+CONTAINS = "contains"
+REFERRING = "referring to"
+
 Number = n:([0-9]+) {return parseInt(n.join(""), 10);}
 
 Primitive = p:("string" / "integer" / "float" / "boolean")
@@ -96,7 +107,12 @@ ClassName = QName
 
 EntityName "EntityName" = Name / LongName
 QName "QName" = Name / LongName
-LongName = "'" Name (__ Name)+ "'" / '"' f:Name s:(__ t:Name {return " "+t})+ '"' {return f+s.join('')}
+LongName = "'" Name (" "+ Name)+ "'" / '"' f:Name s:(" "+ t:Name {return " "+t})+ '"' {return f+s.join('')}
 Name "Name" = c:[A-Za-z] d:[A-Za-z0-9]* {return c+d.join('')}
 _ "WS" = [ \n\r]*
 __ "WS" = [ \n\r]+
+
+HighlightingRules = Keyword / Identifier / Occurence
+Keyword "keyword" = ENUMERATION / WITH / VALUES / ABSTRACT / EXTENDS / HAS / AS / CONTAINS / REFERRING
+Identifier "identifier" = EntityName / FeatureName
+Occurence "occurence" = Multiplicity
