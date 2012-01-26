@@ -152,18 +152,18 @@
                   : e.message;
               }
 
-            function parseResult() {
+            function parseResult(concrete) {
                 try {
-                    var resultTree = ConcreteExpression.createGrammar($("editor").getValue());
+                    var resultTree = ConcreteExpression.buildParser($("editor").getValue(), concrete);
                     $("result-tree").update(jsDump.parse(resultTree));
                     $("message").update("Text parsed succesfully.");
                 } catch (e) {
                     $("message").update(buildErrorMessage(e));
                 }
-                setTimeout(function() {parseResult();}, 1000);
+                setTimeout(function() {parseResult(concrete);}, 1000);
             }
             
-            parseResult();
+            parseResult(ed);
 
         /* ]]> */</script>
     </body>

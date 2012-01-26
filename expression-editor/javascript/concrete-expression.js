@@ -1,9 +1,12 @@
 var ConcreteExpression = {
 
-  createGrammar : function(template, concrete) {
+  buildParser : function(template, concrete) {
     var ast = this.parser.parse(template);
-    this.compiler.enrich(ast, concrete);
-    this.compiler.finalize(ast, concrete);
+    var model = concrete.modelRoot.childElements().collect(function(n){return concrete.modelInterface.extractModel(n)},concrete);
+    this.compiler.enrich(ast, model);
+//    this.compiler.validate(ast, model);
+//    this.compiler.complete(ast, model);
+    this.compiler.vitalize(ast, model);
     return ast;
 //    return PEG.compiler.compile(ast);
   }
@@ -11,7 +14,7 @@ var ConcreteExpression = {
 
 ConcreteExpression.compiler = {
 
-  enrich : function(ast, concrete) {
+  enrich : function(ast, model) {
   
     var sequence = 0;
 
@@ -64,7 +67,7 @@ ConcreteExpression.compiler = {
     visit(ast);
   },
 
-  finalize : function(ast, concrete) {
+  vitalize : function(ast, model) {
     
     function nop() {}
 
@@ -80,14 +83,21 @@ ConcreteExpression.compiler = {
         var expression = Object.clone(node.expression)
         node.expression = {};
         node.expression.type = "action";
+        var list = "["+
+          expression.elements
+            .map(function(element) {
+              if (element.expression!==undefined
+                  && ['zero_or_more','one_or_more','optional'].indexOf(element.expression.type)>=0) {
+                return element.label;
+              } else if (element.type=='labeled') {
+                return "{name:'"+element._feature+"', value:"+element.label+"}";
+              }})
+            .reject(function(element) {return element==undefined || element.length==0})
+            .join(',') + "]";
+
         if (node.type=='rule') {
-          node.expression.code = "return c('"+node.name+"',"+
-          map(expression.elements, function(element) {
-            if (element.type=='labeled') {
-              return "{name:'"+element._feature+"', value:"+element.label+"}";
-            }
-            }).join(',')+")";
-        } else node.expression.code = "return c";
+          node.expression.code = "return c('"+node.name+"',"+ list + ")";
+        } else node.expression.code = "return "+list;
         node.expression.expression = expression;
       }
       visit(node.expression);
@@ -104,6 +114,7 @@ ConcreteExpression.compiler = {
           code:
             "function c(name, features) {\n"+
             "  var clazz = {_class: name};\n"+
+            "  features = features.flatten();\n"+
             "  if (features.length==1) return features[0].value;\n"+
             "  for (f in features) {\n"+
             "    if (!clazz.hasOwnProperty(features[f].name)) {\n"+
