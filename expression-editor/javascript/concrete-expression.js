@@ -3,14 +3,24 @@ var ConcreteExpression = {
   buildParser : function(template, concrete) {
     var ast = this.parser.parse(template);
     var model = concrete.modelRoot.childElements().collect(function(n){return concrete.modelInterface.extractModel(n)},concrete);
-    this.compiler.enrich(ast, model);
-//    this.compiler.validate(ast, model);
-//    this.compiler.complete(ast, model);
-    this.compiler.vitalize(ast, model);
+    var metamodel = new Concrete.MetamodelProvider(model);
+    this.compiler.enrich(ast, metamodel);
+    this.compiler.validate(ast, metamodel);
+//    this.compiler.complete(ast, metamodel);
+    this.compiler.vitalize(ast, metamodel);
+    this.model = ast;
     return ast;
 //    return PEG.compiler.compile(ast);
   }
 }
+
+ConcreteExpression.model = {}
+
+ConcreteExpression.TemplateError = function(message) {
+  this.name = "ConcreteExpression.TemplateError";
+  this.message = message;
+};
+ConcreteExpression.TemplateError.prototype = Error.prototype;
 
 ConcreteExpression.compiler = {
 
@@ -67,6 +77,67 @@ ConcreteExpression.compiler = {
     visit(ast);
   },
 
+  
+  validate : function(ast, model) {
+    
+    function nop() {}
+
+    function validateRule(node) {
+      if (model.metaclassesByName[node.name]==undefined) {
+        throw new ConcreteExpression.TemplateError(
+            "Metamodel has no class named '" +node.name+"'."
+          );
+      } else if (model.metaclassesByName[node.name].abstract==true) {
+        throw new ConcreteExpression.TemplateError(
+            "You should not define template for abstract class '" +node.name+"' - it is automatically handled."
+          );
+      }
+    }
+
+    function visitExpression(node) { visit(node.expression); }
+
+    function visitSubnodes(propertyName) {
+      return function(node) { each(node[propertyName], visit); };
+    }
+
+    var visit = buildNodeVisitor({
+      grammar:
+        function(node) {
+          var startRule = node.startRule;
+          for (var name in node.rules) {
+            visit(node.rules[name]);
+          }
+          model.metaclassesByName[startRule].subTypes.each(function(rule){
+            if (rule.abstract==false && node.rules[rule.name]==undefined) {
+              throw new ConcreteExpression.TemplateError(
+                "Not all subclasses of '"+startRule+"' has defined template - '"+rule.name+"' is missing."
+              );
+            }
+          });
+        },
+
+      rule:         validateRule,
+      choice:       visitSubnodes("alternatives"),
+      sequence:     visitSubnodes("elements"),
+      labeled:      nop,
+      simple_and:   nop,
+      simple_not:   nop,
+      semantic_and: nop,
+      semantic_not: nop,
+      optional:     nop,
+      zero_or_more: nop,
+      one_or_more:  nop,
+      action:       nop,
+      rule_ref:     nop,
+      literal:      nop,
+      any:          nop,
+      "class":      nop
+    });
+
+    visit(ast);
+  },
+
+  
   vitalize : function(ast, model) {
     
     function nop() {}
@@ -110,23 +181,55 @@ ConcreteExpression.compiler = {
             visit(node.rules[name]);
           }
           node.initializer = {
-          type: "initializer",
-          code:
-            "function c(name, features) {\n"+
-            "  var clazz = {_class: name};\n"+
-            "  features = features.flatten();\n"+
-            "  if (features.length==1) return features[0].value;\n"+
-            "  for (f in features) {\n"+
-            "    if (!clazz.hasOwnProperty(features[f].name)) {\n"+
-            "      clazz[features[f].name]=features[f].value;\n"+
-            "    } else if (clazz[features[f].name] instanceof Array) {\n"+
-            "      clazz[features[f].name].push(features[f].value);\n"+
-            "    } else {clazz[features[f].name]=[clazz[features[f].name], features[f].value]}\n"+
-            "  }\n"+
-            "  return clazz;\n"+
-            "}"
+            type: "initializer",
+            code:
+              "function c(name, features) {\n"+
+              "  var clazz = {_class: name};\n"+
+              "  features = features.flatten();\n"+
+              "  if (features.length==1) return features[0].value;\n"+
+              "  for (f in features) {\n"+
+              "    if (!clazz.hasOwnProperty(features[f].name)) {\n"+
+              "      clazz[features[f].name]=features[f].value;\n"+
+              "    } else if (clazz[features[f].name] instanceof Array) {\n"+
+              "      clazz[features[f].name].push(features[f].value);\n"+
+              "    } else {clazz[features[f].name]=[clazz[features[f].name], features[f].value]}\n"+
+              "  }\n"+
+              "  return clazz;\n"+
+              "}"
           };
-        },
+
+          node.rules["_"] = {
+             "type": "rule",
+             "name": "_",
+             "displayName": "WS",
+             "expression": {
+                "type": "zero_or_more",
+                "expression": {
+                   "type": "class",
+                   "inverted": false,
+                   "ignoreCase": false,
+                   "parts": [" "],
+                   "rawText": "[ ]"
+                }
+             }
+          };
+          node.rules["__"] = {
+             "type": "rule",
+             "name": "__",
+             "displayName": "WS",
+             "expression": {
+                "type": "one_or_more",
+                "expression": {
+                   "type": "class",
+                   "inverted": false,
+                   "ignoreCase": false,
+                   "parts": [" "],
+                   "rawText": "[ ]"
+                }
+             }
+          };
+           
+      },
 
       rule:         addAction,
       choice:       visitSubnodes("alternatives"),
