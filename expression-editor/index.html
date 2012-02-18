@@ -82,15 +82,15 @@
                     {"_class": "Feature", "name": "expression", "kind": "containment", "upperLimit": 1, "type": "Expression"}}, 
                     {"_class": "Class", "name": "DivisionExpression", "superTypes": "Expression", "features": 
                     {"_class": "Feature", "name": "expression", "kind": "containment", "upperLimit": 1, "type": "Expression"}}, 
-                    {"_class": "Class", "name": "UnaryExpression", "superTypes": "Expression", "features": 
-                    {"_class": "Feature", "name": "expression", "kind": "containment", "lowerLimit": 0, "upperLimit": 1, "type": "Expression"}}, 
-                    {"_class": "Class", "name": "PrimaryExpression", "abstract": true, "superTypes": "Expression"}, 
+                    {"_class": "Class", "name": "UnaryExpression", "abstract": true, "superTypes": "Expression"}, 
+                    {"_class": "Class", "name": "NegationExpression", "superTypes": "UnaryExpression", "features": 
+                    {"_class": "Feature", "name": "expression", "kind": "containment", "lowerLimit": 1, "upperLimit": 1, "type": "PrimaryExpression"}}, 
+                    {"_class": "Class", "name": "PrimaryExpression", "abstract": true, "superTypes": "UnaryExpression"}, 
                     {"_class": "Class", "name": "VarRef", "superTypes": "PrimaryExpression", "features": 
                     {"_class": "Feature", "name": "variable", "kind": "reference", "lowerLimit": 1, "upperLimit": 1, "type": "Variable"}}, 
                     {"_class": "Class", "name": "Literal", "superTypes": "PrimaryExpression", "features": 
-                    {"_class": "Feature", "name": "value", "kind": "attribute", "type": "Float"}}, 
-                    {"_class": "Datatype", "name": "Float"}]
-            </div>
+                    {"_class": "Feature", "name": "value", "kind": "attribute", "type": "Integer"}}, 
+                    {"_class": "Datatype", "name": "Integer"}]</div>
             <div class="ct_editor" id="metamodel-editor" style="overflow: auto; max-height: 20em; width: 49%">
             </div>
             <div id="result-wrapper" style="overflow: auto; max-height: 20em; width: 45%">
@@ -107,7 +107,8 @@
                     SubstractionExpression = expression:MultiplicativeExpression _ ("-" _ expression:MultiplicativeExpression)*;
                     MultiplicativeExpression = expression:DivisionExpression _ ("*" _ expression:DivisionExpression)*;
                     DivisionExpression = expression:UnaryExpression __ ("div" __ expression:UnaryExpression)*;
-                    UnaryExpression = "-" expression:PrimaryExpression;
+                    NegationExpression = "-" expression:PrimaryExpression;
+                    VarRef = "$" variable:Variable;
                 </textarea>
                 <div id="message"></div>
             </div>
