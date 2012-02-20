@@ -100,15 +100,15 @@
             <div id="input-wrapper">
                 <h3>Expression template editor</h3>
                 <textarea rows="25" cols="50" id="editor" style="overflow: auto; max-height: 20em;">Expression = o:AndExpression;
-                    AndExpression = expression:OrExpression __ ("and" __ expression:OrExpression)*;
-                    OrExpression = expression:ComparisonExpression __ ("or" __ expression:ComparisonExpression)*;
-                    ComparisonExpression = expression1:AdditivityExpression _ operator:ComparisonOperator _ expression2:AdditivityExpression;
-                    AdditivityExpression = expression:SubstractionExpression _ ("+" _ expression:SubstractionExpression)*;
-                    SubstractionExpression = expression:MultiplicativeExpression _ ("-" _ expression:MultiplicativeExpression)*;
-                    MultiplicativeExpression = expression:DivisionExpression _ ("*" _ expression:DivisionExpression)*;
-                    DivisionExpression = expression:UnaryExpression __ ("div" __ expression:UnaryExpression)*;
-                    NegationExpression = "-" expression:PrimaryExpression;
-                    VarRef = "$" variable:Variable;
+AndExpression = expression:OrExpression __ ("and" __ expression:OrExpression)*;
+OrExpression = expression:ComparisonExpression __ ("or" __ expression:ComparisonExpression)*;
+ComparisonExpression = expression1:AdditivityExpression _ operator:ComparisonOperator _ expression2:AdditivityExpression;
+AdditivityExpression = expression:SubstractionExpression _ ("+" _ expression:SubstractionExpression)*;
+SubstractionExpression = expression:MultiplicativeExpression _ ("-" _ expression:MultiplicativeExpression)*;
+MultiplicativeExpression = expression:DivisionExpression _ ("*" _ expression:DivisionExpression)*;
+DivisionExpression = expression:UnaryExpression __ ("div" __ expression:UnaryExpression)*;
+NegationExpression = "-" expression:PrimaryExpression;
+VarRef = "$" variable:Variable;
                 </textarea>
                 <div id="message"></div>
             </div>
