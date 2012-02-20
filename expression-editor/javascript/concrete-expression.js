@@ -101,69 +101,9 @@ ConcreteExpression.compiler = {
   enrich : function(ast, model) {
 
     var sequence = 0;
+    var clazz;
 
     function nop() {
-    }
-
-    function expandFeatures(node) {
-      model.metaclassesByName[node.name].features.each( function(feature) {
-        if (ast.rules[feature.type.name] == undefined) {
-          if (feature.type._class == 'Enum') {
-            ast.rules[feature.type.name] = {
-              type : "rule",
-              name : feature.type.name,
-              displayName : null,
-              expression : {
-                type : "choice",
-                alternatives : feature.type.literals.map( function(element) {
-                  return {
-                    type : "literal",
-                    value : element,
-                    ignoreCase : false
-                  }
-                })
-              }
-            }
-          } else if (feature.type._class == 'Datatype') {
-            // rules for literals
-          } else if (feature.kind == 'reference') {
-            ast.rules[feature.type.name] = {
-              type : "rule",
-              name : feature.type.name,
-              displayName : null,
-              expression : {
-                type : "rule_ref",
-                name : "_reference"
-              }
-            }
-          }
-        }
-      });
-      visit(node.expression);
-    }
-
-    function expandReferences(node) {
-      if (model.metaclassesByName[node.name] != undefined
-          && model.metaclassesByName[node.name].abstract == true
-          && ast.rules[node.name] == undefined) {
-        ast.rules[node.name] = {
-          type : "rule",
-          name : node.name,
-          displayName : null,
-          expression : {
-            type : "choice",
-            alternatives : model.metaclassesByName[node.name].subTypes
-                .map( function(element) {
-                  return {
-                    type : "rule_ref",
-                    name : element.name
-                  }
-                })
-          }
-        }
-        // add new branch for nonabstract references??
-        visit(ast.rules[node.name]);
-      }
     }
 
     function visitExpression(node) {
@@ -183,6 +123,30 @@ ConcreteExpression.compiler = {
       visit(node.expression.expression);
     }
 
+    function addRuleOfAlternatives(name, alternatives) {
+      ast.rules[name] = {
+        type : "rule",
+        name : name,
+        displayName : null,
+        expression : {
+          type : "choice",
+          alternatives : alternatives
+        }
+      }
+    }
+
+    function addProxyToBaseRule(name, target) {
+      ast.rules[name] = {
+        type : "rule",
+        name : name,
+        displayName : null,
+        expression : {
+          type : "rule_ref",
+          name : target
+        }
+      }
+    }
+
     var visit = buildNodeVisitor( {
       grammar : function(node) {
         for ( var name in node.rules) {
@@ -190,12 +154,28 @@ ConcreteExpression.compiler = {
         }
       },
 
-      rule : expandFeatures,
+      rule : function(node) {
+        if (model.metaclassesByName[node.name] != undefined) {
+          clazz = model.metaclassesByName[node.name];
+        } else {
+          clazz = undefined;
+        }
+        visit(node.expression);
+      },
+
       choice : visitSubnodes("alternatives"),
       sequence : visitSubnodes("elements"),
       labeled : function(node) {
         node._feature = node.label;
         node.label = 'id' + sequence++;
+        if (node.expression.type == "rule_ref" && clazz != undefined) {
+          var refs = clazz.features.findAll( function(n) {
+            return n.name == node._feature;
+          });
+          if (refs.size() == 1 && refs.entries()[0].kind == 'reference') {
+            node.expression.name = '_reference';
+          }
+        }
         visit(node.expression);
       },
 
@@ -207,7 +187,41 @@ ConcreteExpression.compiler = {
       zero_or_more : addLabel,
       one_or_more : addLabel,
       action : visitExpression,
-      rule_ref : expandReferences,
+
+      rule_ref : function(node) {
+        if (model.metaclassesByName[node.name] != undefined) {
+          var clazz = model.metaclassesByName[node.name];
+          if (clazz.abstract == true && ast.rules[node.name] == undefined) {
+            addRuleOfAlternatives(node.name, clazz.subTypes.map( function(
+                element) {
+              return {
+                type : "rule_ref",
+                name : element.name
+              }
+            }));
+            visit(ast.rules[node.name]);
+          } else if (ast.rules[node.name] == undefined
+              && clazz.features.size() == 1
+              && clazz.features.entries()[0].type._class == 'Datatype') {
+            addProxyToBaseRule(clazz.name, '_integer');
+          }
+          clazz.features.each( function(feature) {
+            if (ast.rules[feature.type.name] == undefined) {
+              if (feature.type._class == 'Enum') {
+                addRuleOfAlternatives(feature.type.name, feature.type.literals
+                    .map( function(element) {
+                      return {
+                        type : "literal",
+                        value : element,
+                        ignoreCase : false
+                      }
+                    }));
+              }
+            }
+          });
+        }
+      },
+
       literal : nop,
       any : nop,
       "class" : nop
