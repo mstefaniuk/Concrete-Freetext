@@ -2,22 +2,21 @@ var ConcreteExpression = {
 
   buildParser : function(template, concrete) {
     var ast = this.parser.parse(template);
+    this.astbefore = ast;
     var model = concrete.modelRoot.childElements().collect( function(n) {
       return concrete.modelInterface.extractModel(n)
     }, concrete);
     var metamodel = new Concrete.MetamodelProvider(model);
     this.compiler.validate(ast, metamodel);
     this.compiler.enrich(ast, metamodel);
-    // this.compiler.complete(ast, metamodel);
     this.compiler.vitalize(ast, metamodel);
-    this.model = ast;
-    PEG.compiler.compile(ast);
-    return ast;
-    // return PEG.compiler.compile(ast);
+    this.astafter = ast;
+    return PEG.compiler.compile(ast);
   }
 }
 
-ConcreteExpression.model = {}
+ConcreteExpression.astbefore = {};
+ConcreteExpression.astafter = {};
 
 ConcreteExpression.TemplateError = function(message) {
   this.name = "ConcreteExpression.TemplateError";

@@ -18,12 +18,9 @@
     </head>
     <body>
         <div id="container">
-            <div id="templates1" style="display: none">	
-            </div>
+            <div id="templates1" style="display: none"></div>
             
-            <div id="concrete-metamodel" style="display: none">
-                [
-                {"_class": "Datatype", "name": "String"},
+            <div id="concrete-metamodel" style="display: none">[{"_class": "Datatype", "name": "String"},
                 {"_class": "Datatype", "name": "Integer"},
                 {"_class": "Datatype", "name": "Boolean"},
                 {"_class": "Enum", "name": "FeatureKindType", "literals": ["attribute", "reference", "containment"]},
@@ -33,18 +30,15 @@
                 {"_class": "Class", "name": "Class", "superTypes": "Classifier", "features": [
                 {"_class": "Feature", "name": "superTypes", "kind": "reference", "upperLimit": -1, "type": "Class"},
                 {"_class": "Feature", "name": "features", "kind": "containment", "upperLimit": -1, "type": "Feature"},
-                {"_class": "Feature", "name": "abstract", "kind": "attribute", "upperLimit": 1, "type": "Boolean"}
-                ]},
+                {"_class": "Feature", "name": "abstract", "kind": "attribute", "upperLimit": 1, "type": "Boolean"}]},
                 {"_class": "Class", "name": "Feature", "features": [
                 {"_class": "Feature", "name": "name", "kind": "attribute", "lowerLimit": 1, "upperLimit": 1, "type": "String"},
                 {"_class": "Feature", "name": "kind", "kind": "attribute", "lowerLimit": 1, "upperLimit": 1, "type": "FeatureKindType"},
                 {"_class": "Feature", "name": "lowerLimit", "kind": "attribute", "upperLimit": 1, "type": "Integer"},
                 {"_class": "Feature", "name": "upperLimit", "kind": "attribute", "upperLimit": 1, "type": "Integer"},
                 {"_class": "Feature", "name": "type", "kind": "reference", "lowerLimit": 1, "upperLimit": 1, "type": "Classifier"}
-                ]}
-                ]
-            </div>
-            <div id="model" style="display: none">[{"_class": "Datatype", "name": "String"}, 
+                ]}]</div>
+            <div id="concrete-model-code" style="display: none">[{"_class": "Datatype", "name": "String"}, 
                 {"_class": "Class", "name": "Statemachine", "features": [
                 {"_class": "Feature", "name": "name", "kind": "attribute", "lowerLimit": 1, "upperLimit": 1, "type": "String"}, 
                 {"_class": "Feature", "name": "variables", "kind": "containment", "type": "Variable"}, 
@@ -74,59 +68,61 @@
                 {"_class": "Feature", "name": "operator", "kind": "attribute", "lowerLimit": 1, "upperLimit": 1, "type": "ComparisonOperator"}, 
                 {"_class": "Feature", "name": "expression2", "kind": "containment", "lowerLimit": 1, "upperLimit": 1, "type": "Expression"}]}, 
                 {"_class": "Enum", "name": "ComparisonOperator", "literals": ["=", "!=", "<", ">", ">=", "<="]}, 
-                    {"_class": "Class", "name": "AdditivityExpression", "superTypes": "Expression", "features": 
-                    {"_class": "Feature", "name": "expression", "kind": "containment", "lowerLimit": 1, "upperLimit": -1, "type": "Expression"}}, 
-                    {"_class": "Class", "name": "SubstractionExpression", "superTypes": "Expression", "features": 
-                    {"_class": "Feature", "name": "expression", "kind": "containment", "upperLimit": 1, "type": "Expression"}}, 
-                    {"_class": "Class", "name": "MultiplicativeExpression", "superTypes": "Expression", "features": 
-                    {"_class": "Feature", "name": "expression", "kind": "containment", "upperLimit": 1, "type": "Expression"}}, 
-                    {"_class": "Class", "name": "DivisionExpression", "superTypes": "Expression", "features": 
-                    {"_class": "Feature", "name": "expression", "kind": "containment", "upperLimit": 1, "type": "Expression"}}, 
-                    {"_class": "Class", "name": "UnaryExpression", "abstract": true, "superTypes": "Expression"}, 
-                    {"_class": "Class", "name": "NegationExpression", "superTypes": "UnaryExpression", "features": 
-                    {"_class": "Feature", "name": "expression", "kind": "containment", "lowerLimit": 1, "upperLimit": 1, "type": "PrimaryExpression"}}, 
-                    {"_class": "Class", "name": "PrimaryExpression", "abstract": true, "superTypes": "UnaryExpression"}, 
-                    {"_class": "Class", "name": "VarRef", "superTypes": "PrimaryExpression", "features": 
-                    {"_class": "Feature", "name": "variable", "kind": "reference", "lowerLimit": 1, "upperLimit": 1, "type": "Variable"}}, 
-                    {"_class": "Class", "name": "Literal", "superTypes": "PrimaryExpression", "features": 
-                    {"_class": "Feature", "name": "value", "kind": "attribute", "type": "Integer"}}, 
-                    {"_class": "Datatype", "name": "Integer"}]</div>
-            <div class="ct_editor" id="metamodel-editor" style="overflow: auto; max-height: 20em; width: 49%">
+                {"_class": "Class", "name": "AdditivityExpression", "superTypes": "Expression", "features": 
+                {"_class": "Feature", "name": "expression", "kind": "containment", "lowerLimit": 1, "upperLimit": -1, "type": "Expression"}}, 
+                {"_class": "Class", "name": "SubstractionExpression", "superTypes": "Expression", "features": 
+                {"_class": "Feature", "name": "expression", "kind": "containment", "upperLimit": 1, "type": "Expression"}}, 
+                {"_class": "Class", "name": "MultiplicativeExpression", "superTypes": "Expression", "features": 
+                {"_class": "Feature", "name": "expression", "kind": "containment", "upperLimit": 1, "type": "Expression"}}, 
+                {"_class": "Class", "name": "DivisionExpression", "superTypes": "Expression", "features": 
+                {"_class": "Feature", "name": "expression", "kind": "containment", "upperLimit": 1, "type": "Expression"}}, 
+                {"_class": "Class", "name": "UnaryExpression", "abstract": true, "superTypes": "Expression"}, 
+                {"_class": "Class", "name": "NegationExpression", "superTypes": "UnaryExpression", "features": 
+                {"_class": "Feature", "name": "expression", "kind": "containment", "lowerLimit": 1, "upperLimit": 1, "type": "PrimaryExpression"}}, 
+                {"_class": "Class", "name": "PrimaryExpression", "abstract": true, "superTypes": "UnaryExpression"}, 
+                {"_class": "Class", "name": "VarRef", "superTypes": "PrimaryExpression", "features": 
+                {"_class": "Feature", "name": "variable", "kind": "reference", "lowerLimit": 1, "upperLimit": 1, "type": "Variable"}}, 
+                {"_class": "Class", "name": "Literal", "superTypes": "PrimaryExpression", "features": 
+                {"_class": "Feature", "name": "value", "kind": "attribute", "type": "Integer"}}, 
+                {"_class": "Datatype", "name": "Integer"}]</div>
+
+            <div id="concrete-model">
+                <div class="ct_editor" id="concrete-model-editor" style="overflow: auto;">
+                </div><textarea id="concrete-model-clipboard"></textarea>
             </div>
-            <div id="result-wrapper" style="overflow: auto; max-height: 20em; width: 45%">
-                <h3>Model result tree</h3>
-                <pre id="result-tree"></pre>
-            </div>
-            <div id="input-wrapper">
-                <h3>Expression template editor</h3>
-                <textarea rows="25" cols="50" id="editor" style="overflow: auto; max-height: 20em;">Expression = o:AndExpression;
-AndExpression = expression:OrExpression __ ("and" __ expression:OrExpression)*;
-OrExpression = expression:ComparisonExpression __ ("or" __ expression:ComparisonExpression)*;
+            
+            <div id="expression-template">
+                <div id="expression-template-editor"><textarea id="expression-template-code">Expression = o:AndExpression;
+AndExpression = expression:OrExpression (__ "and" __ expression:OrExpression)*;
+OrExpression = expression:ComparisonExpression (__ "or" __ expression:ComparisonExpression)*;
 ComparisonExpression = expression1:AdditivityExpression _ operator:ComparisonOperator _ expression2:AdditivityExpression;
-AdditivityExpression = expression:SubstractionExpression _ ("+" _ expression:SubstractionExpression)*;
-SubstractionExpression = expression:MultiplicativeExpression _ ("-" _ expression:MultiplicativeExpression)*;
-MultiplicativeExpression = expression:DivisionExpression _ ("*" _ expression:DivisionExpression)*;
-DivisionExpression = expression:UnaryExpression __ ("div" __ expression:UnaryExpression)*;
-NegationExpression = "-" expression:PrimaryExpression;
-VarRef = "$" variable:Variable;
-                </textarea>
-                <div id="message"></div>
+AdditivityExpression = expression:SubstractionExpression (_ "+" _ expression:SubstractionExpression)*;
+SubstractionExpression = expression:MultiplicativeExpression (_ "-" _ expression:MultiplicativeExpression)*;
+MultiplicativeExpression = expression:DivisionExpression (_ "*" _ expression:DivisionExpression)*;
+DivisionExpression = expression:UnaryExpression (__ "div" __ expression:UnaryExpression)*;
+NegationExpression = "-" _ expression:PrimaryExpression;
+VarRef = "$" variable:Variable;</textarea><div class="message"></div></div><pre id="expression-template-original-tree"></pre>
+                <pre id="expression-template-manipulated-tree"></pre>
             </div>
-            <div id="grammar-wrapper" style="clear: both;">
-                <h3>Grammar result</h3>
-                <pre id="grammar"></pre>
+            
+            <div id="concrete-instance">
+                <div class="ct_editor" id="concrete-instance-editor" style="overflow: auto;">
+                </div><textarea id="concrete-instance-clipboard"></textarea>
             </div>
 
-            <textarea id="clipboard" style="background-color: white; color: black; border: 1px solid grey" cols="80" rows="10"></textarea>
-            
+            <div id="concrete-expression">
+                <div id="concrete-expression-editor"><textarea id="concrete-expression-code"></textarea><div class="message"></div></div>
+                <pre id="expression-expression-tree"></pre>
+            </div>
+
         </div>
         <script type="text/javascript">
             /* <![CDATA[ */
 			var tp = new Concrete.TemplateProvider($("templates1"), {identifierAttribute: "name"});
 			var mp = new Concrete.MetamodelProvider($("concrete-metamodel").textContent.evalJSON());
 			var ip = new Concrete.QualifiedNameBasedIdentifierProvider({nameAttribute: "name", separator: "/", leadingSeparator: false});
-			var cb = new Concrete.Clipboard($("clipboard"));
-			var ed = new Concrete.Editor($("metamodel-editor"), tp, mp, ip, {clipboard: cb, 
+			var cb = new Concrete.Clipboard($("concrete-model-clipboard"));
+			var ed = new Concrete.Editor($("concrete-model-editor"), tp, mp, ip, {clipboard: cb, 
 				rootClasses: mp.metaclasses.select(function(c) { return ["Class", "Datatype", "Enum", "Expression"].include(c.name)})});
 
 			ed.constraintChecker.addConstraint(new Concrete.ConstraintChecker.FeatureValueConstraint({
@@ -155,10 +151,8 @@ VarRef = "$" variable:Variable;
 			}));
 
 			// load model if present
-			var modelData = $("model").textContent;
-			if (modelData.isJSON()) {
-              ed.setModel(modelData);
-			}
+			var modelData = $("concrete-model-code").textContent;
+			ed.setModel(modelData);
 			
 			Event.observe(window, 'click', function(event) {
 				ed.handleEvent(event);
@@ -170,6 +164,29 @@ VarRef = "$" variable:Variable;
 				ed.handleEvent(event);
 			});
 
+    		var tpi = new Concrete.TemplateProvider($("templates1"), {identifierAttribute: "name"});
+    		var model = ed.modelRoot.childElements().collect( function(n) {
+              return ed.modelInterface.extractModel(n)
+            }, ed);
+    		
+    		var mpi = new Concrete.MetamodelProvider(model);
+    		var ipi = new Concrete.QualifiedNameBasedIdentifierProvider({nameAttribute: "name"});
+    		var cbi = new Concrete.Clipboard($("concrete-instance-clipboard"));
+            var edi = new Concrete.Editor($("concrete-instance-editor"), tpi, mpi, ipi, {clipboard: cbi});
+    			
+			var modelData = $("concrete-model-code").textContent;
+			ed.setModel(modelData);
+
+            Event.observe(window, 'click', function(event) {
+    			edi.handleEvent(event);
+    		});
+    		Event.observe(window, 'keydown', function(event) {
+    			edi.handleEvent(event);
+    		});
+    		Event.observe(window, 'mousemove', function(event) {
+    			edi.handleEvent(event);
+    		});
+
 
               function buildErrorMessage(e) {
                 return e.line !== undefined && e.column !== undefined
@@ -177,18 +194,26 @@ VarRef = "$" variable:Variable;
                   : e.message;
               }
 
-            function parseResult(concrete) {
+            function updateView(concrete) {
+                var parser, tree;
                 try {
-                    var resultTree = ConcreteExpression.buildParser($("editor").getValue(), concrete);
-                    $("result-tree").update(jsDump.parse(resultTree));
-                    $("message").update("Text parsed succesfully.");
+                    parser = ConcreteExpression.buildParser($("expression-template-code").getValue(), concrete);
+                    $("expression-template-manipulated-tree").update(jsDump.parse(ConcreteExpression.astafter));
+                    $$("#expression-template-editor div.message")[0].update("Text parsed succesfully.");
                 } catch (e) {
-                    $("message").update(buildErrorMessage(e));
+                    $$("#expression-template-editor div.message")[0].update(buildErrorMessage(e));
                 }
-                setTimeout(function() {parseResult(concrete);}, 1000);
+                try {
+                    var tree = parser.parse($("concrete-expression-code").getValue());
+                    $$("#concrete-expression-editor div.message")[0].update("Text parsed succesfully.");
+                    $("expression-expression-tree").update(jsDump.parse(tree));
+                } catch (e) {
+                    $$("#concrete-expression-editor div.message")[0].update(buildErrorMessage(e));
+                }
+                setTimeout(function() {updateView(concrete);}, 1000);
             }
             
-            parseResult(ed);
+            updateView(ed);
 
         /* ]]> */</script>
     </body>
