@@ -6,7 +6,7 @@ body {
 	background-color: #002240;
 	color: #fff;
 	font-family: "courier new";
-	font-size: 12;
+	font-size: 12px;
   cursor: default;
 }
  
@@ -27,7 +27,7 @@ body {
 /* text input element */
 .ct_inline_editor input {
 	font-family: "courier new";
-	font-size: 12;
+	font-size: 12px;
 	color: #fff;
 	background-color: transparent;
 	border: 0;
