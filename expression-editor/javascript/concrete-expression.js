@@ -312,13 +312,13 @@ ConcreteExpression.base = {
         + "  var clazz = {_class: name};\n"
         + "  features = features.flatten();\n"
         + "  if (features.length==1) return features[0].value;\n"
-        + "  for (f in features) {\n"
-        + "    if (!clazz.hasOwnProperty(features[f].name)) {\n"
-        + "      clazz[features[f].name]=features[f].value;\n"
-        + "    } else if (clazz[features[f].name] instanceof Array) {\n"
-        + "      clazz[features[f].name].push(features[f].value);\n"
-        + "    } else {clazz[features[f].name]=[clazz[features[f].name], features[f].value]}\n"
-        + "  }\n" + "  return clazz;\n" + "}"
+        + "  features.each(function(f) {\n"
+        + "    if (!clazz.hasOwnProperty(f.name)) {\n"
+        + "      clazz[f.name]=f.value;\n"
+        + "    } else if (clazz[f.name] instanceof Array) {\n"
+        + "      clazz[f.name].push(f.value);\n"
+        + "    } else {clazz[f.name]=[clazz[f.name], f.value]}\n"
+        + "  });\n" + "  return clazz;\n" + "}"
   },
 
   rules : {
