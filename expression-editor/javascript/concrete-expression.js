@@ -79,14 +79,14 @@ ConcreteExpression.compiler = {
       rule : validateRule,
       choice : visitSubnodes("alternatives"),
       sequence : visitSubnodes("elements"),
-      labeled : nop,
+      labeled : visitExpression,
       simple_and : nop,
       simple_not : nop,
       semantic_and : nop,
       semantic_not : nop,
-      optional : nop,
-      zero_or_more : nop,
-      one_or_more : nop,
+      optional : visitExpression,
+      zero_or_more : visitExpression,
+      one_or_more : visitExpression,
       action : nop,
       rule_ref : validateRuleReference,
       literal : nop,
@@ -119,7 +119,8 @@ ConcreteExpression.compiler = {
       node.expression = Object.clone(node);
       node.type = "labeled";
       node.label = 'id' + sequence++;
-      visit(node.expression.expression);
+      if (node.expression.expression)
+        visit(node.expression.expression);
     }
 
     function addRuleOfAlternatives(name, alternatives) {
@@ -221,7 +222,7 @@ ConcreteExpression.compiler = {
         }
       },
 
-      literal : nop,
+      literal : addLabel,
       any : nop,
       "class" : nop
     });
@@ -251,19 +252,22 @@ ConcreteExpression.compiler = {
         node.expression = {};
         node.expression.type = "action";
         var list = "["
-            + expression.elements.map(
-                function(element) {
-                  if (element.expression !== undefined
-                      && [ 'zero_or_more', 'one_or_more', 'optional' ]
-                          .indexOf(element.expression.type) >= 0) {
-                    return element.label;
-                  } else if (element.type == 'labeled') {
-                    return "{name:'" + element._feature + "', value:"
-                        + element.label + "}";
-                  }
-                }).reject( function(element) {
-              return element == undefined || element.length == 0
-            }).join(',') + "]";
+            + expression.elements
+                .map(
+                    function(element) {
+                      if (element.expression !== undefined
+                          && [ 'zero_or_more', 'one_or_more', 'optional' ]
+                              .indexOf(element.expression.type) >= 0) {
+                        return element.label;
+                      } else if (element.type == 'labeled') {
+                        return "{"
+                            + (element.expression.type == 'literal' ? "type:'literal',"
+                                : "type:'feature',name:'" + element._feature
+                                    + "',") + "value:" + element.label + "}";
+                      }
+                    }).reject( function(element) {
+                  return element == undefined || element.length == 0
+                }).join(',') + "]";
 
         if (node.type == 'rule') {
           node.expression.code = "return c('" + node.name + "'," + list + ")";
@@ -308,17 +312,17 @@ ConcreteExpression.compiler = {
 ConcreteExpression.base = {
   initializer : {
     type : "initializer",
-    code : "function c(name, features) {\n"
-        + "  var clazz = {_class: name};\n"
+    code : "function c(name, features) {\n" + "  var clazz = {_class: name};\n"
         + "  features = features.flatten();\n"
         + "  if (features.length==1) return features[0].value;\n"
-        + "  features.each(function(f) {\n"
-        + "    if (!clazz.hasOwnProperty(f.name)) {\n"
-        + "      clazz[f.name]=f.value;\n"
-        + "    } else if (clazz[f.name] instanceof Array) {\n"
-        + "      clazz[f.name].push(f.value);\n"
-        + "    } else {clazz[f.name]=[clazz[f.name], f.value]}\n"
-        + "  });\n" + "  return clazz;\n" + "}"
+        + "  features.reject(function(e){return e.type=='literal'})"
+        + "    .each(function(f) {\n"
+        + "      if (!clazz.hasOwnProperty(f.name)) {\n"
+        + "        clazz[f.name]=f.value;\n"
+        + "      } else if (clazz[f.name] instanceof Array) {\n"
+        + "        clazz[f.name].push(f.value);\n"
+        + "      } else {clazz[f.name]=[clazz[f.name], f.value]}\n" + "  });\n"
+        + "    return clazz;\n" + "}"
   },
 
   rules : {
@@ -357,14 +361,22 @@ ConcreteExpression.base = {
       "name" : "_integer",
       "displayName" : null,
       "expression" : {
-        "type" : "one_or_more",
+        "type" : "action",
         "expression" : {
-          "type" : "class",
-          "inverted" : false,
-          "ignoreCase" : false,
-          "parts" : [ [ "0", "9" ] ],
-          "rawText" : "[0-9]"
-        }
+          "type" : "labeled",
+          "label" : "i",
+          "expression" : {
+            "type" : "one_or_more",
+            "expression" : {
+              "type" : "class",
+              "inverted" : false,
+              "ignoreCase" : false,
+              "parts" : [ [ "0", "9" ] ],
+              "rawText" : "[0-9]"
+            }
+          }
+        },
+        "code" : "return parseInt(i.join(''), 10);"
       }
     },
     "_reference" : {
@@ -372,24 +384,40 @@ ConcreteExpression.base = {
       "name" : "_reference",
       "displayName" : null,
       "expression" : {
-        "type" : "one_or_more",
+        "type" : "action",
         "expression" : {
-          "type" : "sequence",
-          "elements" : [ {
-            "type" : "literal",
-            "value" : "/",
-            "ignoreCase" : false
-          }, {
+          "type" : "labeled",
+          "label" : "r",
+          "expression" : {
             "type" : "one_or_more",
             "expression" : {
-              "type" : "class",
-              "inverted" : false,
-              "ignoreCase" : true,
-              "parts" : [ [ "A", "Z" ] ],
-              "rawText" : "[A-Z]"
+              "type" : "action",
+              "expression" : {
+                "type" : "sequence",
+                "elements" : [ {
+                  "type" : "literal",
+                  "value" : "/",
+                  "ignoreCase" : false
+                }, {
+                  "type" : "labeled",
+                  "label" : "r",
+                  "expression" : {
+                    "type" : "one_or_more",
+                    "expression" : {
+                      "type" : "class",
+                      "inverted" : false,
+                      "ignoreCase" : false,
+                      "parts" : [ [ "A", "Z" ], [ "a", "z" ] ],
+                      "rawText" : "[A-Za-z]"
+                    }
+                  }
+                } ]
+              },
+              "code" : "return '/'+r.join('')"
             }
-          } ]
-        }
+          }
+        },
+        "code" : "return r.join('')"
       }
     }
   }
